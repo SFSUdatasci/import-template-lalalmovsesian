@@ -6,7 +6,9 @@ format: html
 
 ## Goal
 Confirm that R, Quarto, GitHub, and rendering all work.
+I have edited this file
 
 ## R works
 ```{r}
 1 + 1
+

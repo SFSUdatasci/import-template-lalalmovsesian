@@ -17,6 +17,8 @@ Source: <https://learning.nceas.ucsb.edu/2024-10-coreR/session_05.html>
 
 ## About the data
 
+The Refield ratio was calculated in 1934 based on samples from different oceans showing a consistent ratio of Carbon, Nitrogen, and Phosphorus in phytoplankton. Caluculating this ratio in different samples can show us the limiting factors of growth in those communities, and gain insight into the health of the ocean.
+
 The seawater chemistry dataset used here is `BGchem2008data.csv` (downloaded previously in the course).
 
 -   Date downloaded: August 8, 2025
@@ -40,7 +42,7 @@ Quarto runs R in the same way as a script: objects only exist after the chunks t
 Using `here()` is a convenient way to build paths relative to your project root (e.g., your `.qmd` might live in `scripts/` while data lives in `data/`).
 
 ```{r}
-bg_chem <- read_csv(here::here("data", "BGchem2008data.csv"))
+bg_chem <- read_csv(here::here("data", "raw", "BGchem2008data.csv"))
 ```
 
 (Optional) Quick peek at the data:
@@ -48,7 +50,7 @@ bg_chem <- read_csv(here::here("data", "BGchem2008data.csv"))
 ```{r}
 # Uncomment if you want more inspection output
  names(bg_chem)
-# str(bg_chem)
+ str(bg_chem)
 # head(bg_chem)
 # summary(bg_chem)
 ```
@@ -92,6 +94,8 @@ plot(
   main = "Ocean water samples: total N vs P"
 )
 ```
+
+The generated plot shows the total nitrogen (sum of nitrate, nitrite, and ammonium) on the y axis, and phosphate on the x axis. Most of the samples show a linear relationship between these two, revealing a general consistency, yet the slope is smaller from the Redfield ratio, showing that these samples are possibly one of the cases with varied ratio e.g diatoms or fast growing cells.
 
 # Conclusion
 

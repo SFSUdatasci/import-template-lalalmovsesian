@@ -1,8 +1,7 @@
 name: Render Quarto (PR)
 
 on:
-  pull_request:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   render:

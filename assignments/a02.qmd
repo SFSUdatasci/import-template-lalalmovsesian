@@ -1,0 +1,43 @@
+---
+title: "Assignment 02"
+subtitle: "Tidy Data"
+author: "Lala Movsesian"
+format: html
+---
+
+# Purpose
+
+This Quarto document is used to load krill size data and check if it follows tidy principles
+
+# Setup
+
+loading packages
+
+```{r}
+library(here)
+library(readr)
+library(readxl)
+library(dplyr)
+```
+
+# Read in the data
+
+loading my data file as krill_size
+
+```{r}
+krill_size <- read_excel(here::here("data", "raw", "KrillData.xlsx"))
+
+
+```
+
+# View data
+
+viewing data to check if it is tidy
+
+```{r}
+View(krill_size)
+```
+
+# Conclusion
+
+Data follows all 3 principles of tidy data.

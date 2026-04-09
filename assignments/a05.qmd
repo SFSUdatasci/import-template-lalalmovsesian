@@ -8,11 +8,13 @@ format: html
 
 # Introduction
 
-Practicing data visualization following "Week 8-10" instructions from the textbook using data from 10 sites in Ecorestore project, monitoring human activities. The goal of this assignment is to create a visual comparative bar chart of human activity types across sites, and display the corresponding location on an interactive map.
+This project analyzes data from 10 sites in Ecorestore project, monitoring human activities. The goal is to create a visual comparative bar chart of human activity types across sites, and display the corresponding location on an interactive map. 
+Data source: https://portal.edirepository.org/nis/mapbrowse?packageid=edi.587.1
+
 
 # Setup
 
-Loading libraries:
+Loading libraries and data:
 
 ```{r}
 library(readr)
@@ -25,13 +27,7 @@ library(DT) # interactive tables
 library(scales) # scale functions for visualization
 library(janitor) # expedite cleaning and exploring data
 library(viridis) # colorblind friendly color palette
-```
 
-Loading data:
-
-Data source https://portal.edirepository.org/nis/mapbrowse?packageid=edi.587.1
-
-```{r}
 delta_visits_raw <- read_csv(here::here("data/raw/Socioecological_monitoring_data.csv"))
 ```
 
@@ -40,13 +36,11 @@ delta_visits_raw <- read_csv(here::here("data/raw/Socioecological_monitoring_dat
 cleaning column names:
 
 ```{r}
+#cleaning column names
 delta_visits <- delta_visits_raw %>% 
     janitor::clean_names()
-```
 
-changing to long format:
-
-```{r}
+#changing to long fromat
 visits_long <- delta_visits %>% 
     pivot_longer(cols = c(sm_boat, med_boat, lrg_boat, bank_angler, scientist, cars),
                  names_to = "visitor_type",
@@ -55,6 +49,7 @@ visits_long <- delta_visits %>%
     select(-notes)
 
 ```
+
 
 calculating daily visit number:
 
@@ -67,9 +62,9 @@ daily_visits_loc <- visits_long %>%
 
 # Creating a bar chart
 
-re-ordering the variables:
 
 ```{r}
+#re-ordering the variables
 daily_visits_totals <- daily_visits_loc %>% 
     group_by(restore_loc) %>%
     mutate(n = sum(daily_visits)) %>%  #adding a column showing the tot number of visits
@@ -104,8 +99,6 @@ ggplot(data = daily_visits_totals,
     my_theme
 # using the custom theme that was saved before
 ```
-
-*first, taking a moment to enjoy the neat plot and nice colors, then:*
 
 saving the bar chart:
 

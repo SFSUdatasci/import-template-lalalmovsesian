@@ -198,15 +198,12 @@ There seems to be a difference in months across the years, spring/summer months 
 
 ### Questions
 
-Does it give you the outcome you expected?
-\
+Does it give you the outcome you expected?\
 Not at first, there were rows of NA date/count, was resolved by checking main dfs for NA values and excluding NA counts.
 
-Is it informative?
-\
+Is it informative?\
 It can be used to test seasonal variability in the number of birds.
 Very simplified since year and species (biodiversity) are not taken into consideration.
 
-How would you improve this wrangling process?
-\
+How would you improve this wrangling process?\
 Check for NAs and other "problematic" data before joins.

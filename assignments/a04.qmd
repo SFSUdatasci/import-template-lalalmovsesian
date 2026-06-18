@@ -1,0 +1,209 @@
+---
+title: "R Practice: Tidy Data and Joins"
+format: html
+date: 03/12/2026
+author: Lala Movsesian
+editor: 
+  markdown: 
+    wrap: sentence
+---
+
+loading libraries:
+
+```{r}
+library(readr)
+library(dplyr)
+library(here)
+library(lubridate)
+```
+
+## Introduction
+
+This is a data wrangling practice following the steps described in the course textbook week 7.
+
+## Part 1 Data
+
+This is data from the EDI Data Portal Ecological and social interactions in urban parks: bird surveys in local parks in the central Arizona-Phoenix metropolitan area.
+
+```{r}
+bird_observations <- read.csv(here::here("data","raw","birds.csv"))
+sites <- read.csv(here::here("data","raw","sites.csv"))
+surveys <- read.csv(here::here("data","raw","surveys.csv"))
+taxalist <- read.csv(here::here("data","raw","taxalist.csv"))
+```
+
+## Part 2
+
+uncomment to explore the data:
+
+```{r}
+#head(bird_observations)
+#head(sites)
+#head(surveys)
+#head(taxalist)
+```
+
+## Part 3
+
+making a subset to show only species brown-headed cowbird and red-winged blackbird, and sites LI-W and NU-C
+
+```{r}
+birds_subset <- bird_observations %>% 
+  filter(species_id %in% c("BHCO", "RWBL")) %>% 
+  filter(site_id %in% c("LI-W", "NU-C"))
+```
+
+## Part 4
+
+### Question 4a:
+
+what do you expect the outcome data frame when doing left_join() between birds_subset and sites to look like?
+What observations do you expect in the outcome data frame?
+
+**Answer:** row count same as birds_subset, added columns from sites (park code, name, district, ...)
+
+Adding site information from sites data using left joint and site_id as key:
+
+```{r}
+
+birds_left <- birds_subset %>% 
+  left_join(y = sites, by = "site_id")
+
+```
+
+## Part 5
+
+### Question 5a:
+
+What do you expect a full_join() between birds_subset and sites to contain?
+Write this in your Quarto Document or tell a neighbor.
+
+**Answer:** adding all sites, so a lot of rows where most don't have any observation/bird data in birds_subset.
+This is not a reasonable approach in this case.
+
+## Part 6
+
+### Question 6a:
+
+What do you expect an inner_join() between birds_subset and taxalist to contain?
+
+**Answer:** Using species_id as key, all rows from bird_subset will be in the new df since both of the unique values in species_id from bird_subset exist in taxalist.
+Columns with species common name and asu_itis will be added to the new df.
+
+### Question 6b:
+
+What would you get if instead of inner_join() you’d used left_join() for this example?
+Write code for the left join and check.
+
+**Answer:** same as inner_joint, since all unique values of the key in bird_subset exist in taxalist
+
+### Question 6c: Why does that make sense for this scenario?
+
+In what case would you expect the outcome to differ from an inner_join()?
+Write this in your Quarto Document or tell a neighbor.
+
+**Answer:** if there are species_id values in bird_subset that are not in taxalist
+
+Adding taxa information from taxalist data using inner joint and species_id as key
+
+```{r}
+birds_inner <- birds_subset %>% 
+  inner_join(y = taxalist, by = "species_id")
+```
+
+## Part 7
+
+Renaming notes column in bird_obserrvation, so it differs from notes column in survey:
+
+```{r}
+bird_observations <- bird_observations %>% 
+  rename(bird_obs_notes = notes)
+```
+
+Creating a df with all taxa, site, and survey information (merging all 4 datasets), only showing survey_date, common_name, park_name, bird_count and observer name:
+
+```{r}
+bird_obs_subset <- bird_observations %>% 
+  full_join(y = taxalist, by = "species_id") %>% 
+  full_join(y = sites, by = "site_id") %>% 
+  full_join(y = surveys, by = c("site_id", "survey_id")) %>%  
+  select(survey_date, common_name, park_name, bird_count, observer)
+```
+
+## Part 8
+
+Checking observer names:
+
+```{r}
+unique(bird_obs_subset$observer)
+```
+
+Changing Josh Burns to J.
+Burns since *someone forgot to keep their data entry consistent* :)) then double checking:
+
+```{r}
+bird_obs_subset <- bird_obs_subset %>% 
+  mutate(observer = if_else(condition = observer == "Josh Burns", 
+                            true = "J. Burns", 
+                            false = observer))
+
+unique(bird_obs_subset$observer)
+```
+
+## Part 9
+
+Adding new column to show month of survey:
+
+```{r}
+bird_obs_subset$survey_month <- month(ymd_hms(bird_obs_subset$survey_date))
+```
+
+Moving month column to right after survey date:
+
+```{r}
+bird_obs_subset <- bird_obs_subset %>% 
+  relocate(survey_month, .after = survey_date)
+```
+
+Filtering for some parks (Lindo, Orme, Palomino, Sonrisa):
+
+```{r}
+bird_obs_subset_parks <- bird_obs_subset %>% 
+  filter(park_name %in% c("Lindo", "Orme", "Palomino", "Sonrisa"))
+```
+
+quick check:
+
+```{r}
+unique(bird_obs_subset_parks$park_name)
+unique(bird_obs_subset_parks$survey_month)
+unique(bird_obs_subset_parks$bird_count)
+```
+
+There are NAs in bird_count and survey_month, excluding those rows, and calculating total number of birds per month per park
+
+```{r}
+bird_month_counts <- bird_obs_subset_parks %>%
+  filter(!is.na(bird_count), !is.na(survey_month)) %>%
+  group_by(park_name, survey_month) %>%
+  summarise(total_birds = sum(bird_count))
+```
+
+## Summary:
+
+### Conclusion
+
+Final data shows a difference in bird count in different parks with Lindo mostly having the highest count.
+There seems to be a difference in months across the years, spring/summer months show an overall higher count compared to fall/winter.
+
+### Questions
+
+Does it give you the outcome you expected?\
+Not at first, there were rows of NA date/count, was resolved by checking main dfs for NA values and excluding NA counts.
+
+Is it informative?\
+It can be used to test seasonal variability in the number of birds.
+Very simplified since year and species (biodiversity) are not taken into consideration.
+
+How would you improve this wrangling process?\
+Check for NAs and other "problematic" data before joins.
